@@ -10,6 +10,9 @@ all:
 deb:
 	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) .
 
+install:
+	lib/installer.sh "${DESTDIR}"
+
 localtest: deb
 	sudo dpkg -i $(PACKAGE)
 
