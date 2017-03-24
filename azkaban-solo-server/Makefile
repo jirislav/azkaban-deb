@@ -2,6 +2,7 @@ DESTDIR=
 COMPONENT=azkaban
 AZKABAN_TYPE=azkaban-solo-server
 
+#TODO: Create different make targets for each azkaban server type
 START_SCRIPT=azkaban-solo-start
 STOP_SCRIPT=azkaban-solo-shutdown
 
