@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONF_FILE=/etc/azkaban-exec-port/azkaban.properties
+CONF_FILE=/etc/azkaban-exec-server/azkaban.properties
 
 getConfigValue() {
     KEY="$1"
@@ -19,7 +19,7 @@ MYSQL_DB=`getConfigValue mysql\.database`
 
 echo
 echo "Now you should add this executor to the database, usually it's okay to run just this command:"
-echo "mysql --user=$MYSQL_USER --password=$MYSQL_PW --port=$MYSQL_PORT --host=$MYSQL_HOST --execute=\"insert into executors (host, port) values ('`hostname`', $PORT);\""
+echo "mysql --user=$MYSQL_USER --password=$MYSQL_PW --port=$MYSQL_PORT --host=$MYSQL_HOST --execute=\"insert into executors (host, port) values ('`hostname`', $PORT);\"" $MYSQL_DB
 echo
 echo "Or if you are going to change your DB connection in '$CONF_FILE', just substitute your values"
 echo
