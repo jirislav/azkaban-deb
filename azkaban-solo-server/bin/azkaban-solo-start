@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Specifies location of azkaban.properties, log4j.properties files
+# Change if necessary
+conf=/etc/azkaban-solo-server
+plugins=$conf/plugins
+libs=/usr/lib/azkaban-solo-server
+
+if [[ -z "$tmpdir" ]]; then
+    tmpdir=/tmp
+fi
+
+for file in $libs/*.jar;
+do
+    CLASSPATH=$CLASSPATH:$file
+done
+
+for file in $libs/extlib/*.jar;
+do
+    CLASSPATH=$CLASSPATH:$file
+done
+
+for file in $plugins/*/*.jar;
+do
+    CLASSPATH=$CLASSPATH:$file
+done
+
+if [ "$HADOOP_HOME" != "" ]; then
+    echo "Using Hadoop from $HADOOP_HOME"
+    CLASSPATH=$CLASSPATH:$HADOOP_HOME/conf:$HADOOP_HOME/*
+    JAVA_LIB_PATH="-Djava.library.path=$HADOOP_HOME/lib/native/Linux-amd64-64"
+else
+    echo "Error: HADOOP_HOME is not set. Hadoop job types will not run properly."
+fi
+
+if [ "$HIVE_HOME" != "" ]; then
+    echo "Using Hive from $HIVE_HOME"
+    CLASSPATH=$CLASSPATH:$HIVE_HOME/conf:$HIVE_HOME/lib/*
+fi
+
+executorport=`cat $conf/azkaban.properties | grep executor.port | cut -d = -f 2`
+serverpath=/usr/share/azkaban-solo-server
+logdir=/var/log/azkaban-solo-server
+
+OUT_LOG=$logdir/output.log
+ERR_LOG=$logdir/error.log
+
+if [ -z $AZKABAN_OPTS ]; then
+    AZKABAN_OPTS=-Xmx3G
+fi
+# Set the log4j configuration file
+if [ -f $conf/log4j.properties ]; then
+    AZKABAN_OPTS="$AZKABAN_OPTS -Dlog4j.configuration=file:$conf/log4j.properties"
+fi
+AZKABAN_OPTS="$AZKABAN_OPTS -server -Dcom.sun.management.jmxremote -Djava.io.tmpdir=$tmpdir -Dexecutorport=$executorport -Dserverpath=$serverpath -Dlog4j.log.dir=$logdir"
+
+cd /usr/share/azkaban-solo-server
+java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
+
+PID=$!
+
+# Sleep for a few seconds & check process is still running
+sleep 2
+if test -z "`ps x | grep ^$PID`"; then
+    echo "Server start failed!" >&2
+    echo -e "Serverpath: $serverpath\n" >&2
+    tail $ERR_LOG >&2
+    exit 1
+fi
+
+echo $PID > /var/run/azkaban-solo-server/currentpid
+
+echo "Server started successfully"
+echo "Logging dir: $logdir"
+echo "PID: $PID"
