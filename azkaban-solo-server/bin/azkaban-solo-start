@@ -61,6 +61,18 @@ if [ -f $conf/log4j.properties ]; then
 fi
 AZKABAN_OPTS="$AZKABAN_OPTS -server -Dcom.sun.management.jmxremote -Djava.io.tmpdir=$tmpdir -Dexecutorport=$executorport -Dserverpath=$serverpath -Dlog4j.log.dir=$logdir"
 
+java -version 2>&1 | egrep -o "build 1\.[891]" >/dev/null
+
+if test $? -ne 0; then
+    echo "Java must run in version 8 and higher!" >&2
+    echo "On debian distro you can run:" >&2
+    echo " update-alternatives --config java" >&2
+    exit 2
+fi
+
+echo "Running the server ..."
+echo "Logging dir: $logdir"
+
 cd /usr/share/azkaban-solo-server
 java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
 
@@ -78,7 +90,6 @@ fi
 echo $PID > /var/run/azkaban-solo-server/currentpid
 
 echo "Server started successfully"
-echo "Logging dir: $logdir"
 echo "PID: $PID"
 echo
 echo "You can visit the azkaban-web-server at $webprotocol`hostname`:$jettyport"
