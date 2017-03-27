@@ -39,6 +39,13 @@ if [ "$HIVE_HOME" != "" ]; then
 fi
 
 executorport=`cat $conf/azkaban.properties | grep executor.port | cut -d = -f 2`
+jettyport=`cat $conf/azkaban.properties | grep jetty.port | cut -d = -f 2`
+jettyssl=`cat $conf/azkaban.properties | grep jetty.use.ssl | cut -d = -f 2`
+if test $jettyssl = "false"; then
+    webprotocol="http://"
+else
+    webprotocol="https://"
+fi
 serverpath=/usr/share/azkaban-solo-server
 logdir=/var/log/azkaban-solo-server
 
@@ -73,3 +80,5 @@ echo $PID > /var/run/azkaban-solo-server/currentpid
 echo "Server started successfully"
 echo "Logging dir: $logdir"
 echo "PID: $PID"
+echo
+echo "You can visit the azkaban-web-server at $webprotocol`hostname`:$jettyport"
