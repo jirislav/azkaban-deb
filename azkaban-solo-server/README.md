@@ -1,4 +1,4 @@
-#### This repository provides debian package for [azkaban](https://github.com/azkaban/azkaban)
+#### This repository provides debian package for [azkaban solo server](http://azkaban.github.io/azkaban/docs/latest/#solo-setup)
 
 After cloning this repository, run also update for submodules:
 ```bash
@@ -11,10 +11,10 @@ git clone --recursive
 ```
 
 #### Official project documentation
-[Latest Docs](http://azkaban.github.io/azkaban/docs/latest/)
-[Getting Started](http://azkaban.github.io/azkaban/docs/latest/#getting-started)
-[Configuration](http://azkaban.github.io/azkaban/docs/latest/#configuration)
-[Creating Flows](http://azkaban.github.io/azkaban/docs/latest/#creating-flows)
+ - [Latest Docs](http://azkaban.github.io/azkaban/docs/latest/)
+ - [Getting Started](http://azkaban.github.io/azkaban/docs/latest/#getting-started)
+ - [Configuration](http://azkaban.github.io/azkaban/docs/latest/#configuration)
+ - [Creating Flows](http://azkaban.github.io/azkaban/docs/latest/#creating-flows)
 
 #### Project hiearchy (azkaban-solo-server)
 
