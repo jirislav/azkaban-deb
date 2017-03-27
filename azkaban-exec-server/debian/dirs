@@ -2,3 +2,4 @@
 /var/run/azkaban-exec-server
 /etc/azkaban-exec-server/plugins
 /usr/lib/azkaban-exec-server/extlib
+/var/lib/azkaban-exec-server

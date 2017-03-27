@@ -39,7 +39,7 @@ if [ "$HIVE_HOME" != "" ]; then
 fi
 
 executorport=`cat $conf/azkaban.properties | grep executor.port | cut -d = -f 2`
-serverpath=/usr/share/azkaban-exec-server
+serverpath=/var/lib/azkaban-exec-server
 logdir=/var/log/azkaban-exec-server
 
 OUT_LOG=$logdir/output.log
