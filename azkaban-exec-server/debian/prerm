@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+runIfExists() {
+    FILE="$1"
+    if [ -f "$FILE" ]; then
+        "$FILE"
+    fi
+}
+
+deleteIfExists() {
+    FILE="$1"
+    if [ -f "$FILE" ]; then
+        rm "$FILE"
+    fi
+}
+
+runIfExists /usr/bin/azkaban-exec-shutdown
+deleteIfExists /var/run/azkaban-exec-server/currentpid
+deleteIfExists /var/log/azkaban-exec-server/output.log
+deleteIfExists /var/log/azkaban-exec-server/error.log
+
