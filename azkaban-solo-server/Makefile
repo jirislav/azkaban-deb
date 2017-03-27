@@ -8,8 +8,8 @@ BIN=$(DESTDIR)/usr/bin
 LIB=$(DESTDIR)/usr/lib/$(COMPONENT)
 CONF=$(DESTDIR)/etc/$(COMPONENT)
 CONF_PLUGINS=$(DESTDIR)/etc/$(COMPONENT)/plugins
-SQL_DEST=$(DESTDIR)/usr/share/${COMPONENT}/sql
-WEB_DEST=$(DESTDIR)/usr/share/${COMPONENT}/web
+SQL_DEST=$(DESTDIR)/var/lib/${COMPONENT}/sql
+WEB_DEST=$(DESTDIR)/var/lib/${COMPONENT}/web
 
 BUILD=src/$(COMPONENT)/build/install/$(COMPONENT)
 

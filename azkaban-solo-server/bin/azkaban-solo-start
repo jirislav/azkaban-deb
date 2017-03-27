@@ -46,7 +46,7 @@ if test $jettyssl = "false"; then
 else
     webprotocol="https://"
 fi
-serverpath=/usr/share/azkaban-solo-server
+serverpath=/var/lib/azkaban-solo-server
 logdir=/var/log/azkaban-solo-server
 
 OUT_LOG=$logdir/output.log
@@ -73,7 +73,7 @@ fi
 echo "Running the server ..."
 echo "Logging dir: $logdir"
 
-cd /usr/share/azkaban-solo-server
+cd $serverpath
 java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
 
 PID=$!
