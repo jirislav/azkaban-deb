@@ -1,0 +1,5 @@
+/var/log/azkaban-solo-server
+/var/run/azkaban-solo-server
+/etc/azkaban-solo-server/plugins
+/usr/lib/azkaban-solo-server/extlib
+/usr/share/azkaban-solo-server
