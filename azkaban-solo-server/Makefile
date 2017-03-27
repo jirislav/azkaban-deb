@@ -11,9 +11,6 @@ CONF_PLUGINS=$(DESTDIR)/etc/$(COMPONENT)/plugins
 SQL_DEST=$(DESTDIR)/usr/share/${COMPONENT}/sql
 WEB_DEST=$(DESTDIR)/usr/share/${COMPONENT}/web
 
-LOG_DIR=/var/log/azkaban-solo-server
-RUN_DIR=/var/run/azkaban-solo-server
-
 BUILD=src/$(COMPONENT)/build/install/$(COMPONENT)
 
 all:
@@ -22,7 +19,7 @@ deb:
 	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) .
 
 install:
-	install -d $(CONF) $(CONF_PLUGINS) $(LIB) $(SQL_DEST) $(WEB_DEST) $(BIN_DEST) $(BIN) $(LOG_DIR) $(RUN_DIR)
+	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(SQL_DEST) $(WEB_DEST) $(BIN_DEST) $(BIN)
 	cp -R $(BUILD)/conf/* $(CONF)
 	cp -R conf/* $(CONF)
 	cp -R $(BUILD)/plugins/* $(CONF_PLUGINS)
