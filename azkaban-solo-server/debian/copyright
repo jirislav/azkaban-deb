@@ -1,4 +1,4 @@
-Name: azkaban
+Name: azkaban-solo-server
 Maintainer: Jiri Kozlovsky <jiri.kozlovsky@firma.seznam.cz>
 Source: https://github.com/azkaban/azkaban
 
