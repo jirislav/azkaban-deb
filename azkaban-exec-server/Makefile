@@ -8,6 +8,7 @@ BIN=$(DESTDIR)/usr/bin
 LIB=$(DESTDIR)/usr/lib/$(COMPONENT)
 CONF=$(DESTDIR)/etc/$(COMPONENT)
 CONF_PLUGINS=$(DESTDIR)/etc/$(COMPONENT)/plugins
+SERVER_PATH=$(DESTDIR)/var/lib/$(COMPONENT)
 
 BUILD=src/$(COMPONENT)/build/install/$(COMPONENT)
 
@@ -17,7 +18,7 @@ deb:
 	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) .
 
 install:
-	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(BIN)
+	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(BIN) $(SERVER_PATH)
 	cp -R conf/* $(CONF)
 	cp -R $(BUILD)/lib/* $(LIB)
 	-cp -R extlib/* $(LIB)/extlib
