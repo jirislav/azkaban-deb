@@ -17,7 +17,7 @@ npm config set strict-ssl false
 npm install -g less dustjs-linkedin
 
 # Now run gradlew
-./gradlew build installDist || exitWith "Failed to build azkaban with gradlew"
+./gradlew installDist --stacktrace || exitWith "Failed to build azkaban with gradlew"
 
 echo "Now you can run make install"
 

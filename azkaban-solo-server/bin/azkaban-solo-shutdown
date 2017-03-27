@@ -1,0 +1,9 @@
+#!/bin/bash
+
+PID_FILE=/var/run/azkaban-solo-server/currentpid
+
+proc=`cat $PID_FILE`
+echo "killing AzkabanSingleServer"
+kill $proc
+
+cat /dev/null > $PID_FILE
