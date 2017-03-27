@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+CONF_FILE=/etc/azkaban-exec-port/azkaban.properties
+
+getConfigValue() {
+    KEY="$1"
+    if [ -z "$CONF" ]; then
+        CONF=`cat "$CONF_FILE"`
+    fi
+    echo "$CONF" | grep "$KEY" | cut -d = -f 2
+}
+
+PORT=`getConfigValue executor\.port`
+MYSQL_USER=`getConfigValue mysql\.user`
+MYSQL_PW=`getConfigValue mysql\.password`
+MYSQL_HOST=`getConfigValue mysql\.host`
+MYSQL_PORT=`getConfigValue mysql\.port`
+MYSQL_DB=`getConfigValue mysql\.database`
+
+echo
+echo "Now you should add this executor to the database, usually it's okay to run just this command:"
+echo "mysql --user=$MYSQL_USER --password=$MYSQL_PW --port=$MYSQL_PORT --host=$MYSQL_HOST --execute=\"insert into executors (host, port) values ('`hostname`', $PORT);\""
+echo
+echo "Or if you are going to change your DB connection in '$CONF_FILE', just substitute your values"
+echo
+echo "See http://azkaban.github.io/azkaban/docs/latest/#multipleExecutors-config for more information"
+echo
