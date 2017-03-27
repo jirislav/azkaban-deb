@@ -10,6 +10,8 @@ Or clone this repository directly with all submodules:
 git clone --recursive
 ```
 
+Also, don't forget to checkout some stable version in src (maybe latest tag?) .. that depends on you ..
+
 #### Official project documentation
  - [Latest Docs](http://azkaban.github.io/azkaban/docs/latest/)
  - [Getting Started](http://azkaban.github.io/azkaban/docs/latest/#getting-started)
