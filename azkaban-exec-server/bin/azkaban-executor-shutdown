@@ -47,6 +47,10 @@ kill_process_with_retry() {
 }
 
 RUN_DIR=/var/run/azkaban-exec-server
+if test ! -f $RUN_DIR/currentpid; then
+    echo "currentpid empty - not running?"
+    exit 0
+fi
 
 maxattempt=3
 pid=`cat $RUN_DIR/currentpid`
@@ -56,7 +60,7 @@ kill_process_with_retry "${pid}" "${pname}" "${maxattempt}"
 
 if [[ $? == 0 ]]; then
     rm -f $RUN_DIR/currentpid
-    rm -f ${installdir}/executor.port
+    rm -f $RUN_DIR/executor.port
     exit 0
 else
     exit 1
