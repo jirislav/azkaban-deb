@@ -44,8 +44,6 @@ executorport=`cat $conf/azkaban.properties | grep executor.port | cut -d = -f 2`
 serverpath=/var/lib/azkaban-exec-server
 logdir=/var/log/azkaban-exec-server
 
-OUT_LOG=$logdir/output.log
-ERR_LOG=$logdir/error.log
 
 if [ -z $AZKABAN_OPTS ]; then
 	AZKABAN_OPTS=-Xmx3G
@@ -69,18 +67,17 @@ echo "Running the executor server on port $executorport"
 echo "Logging dir: $logdir"
 
 cd $serverpath
-java $AZKABAN_OPTS $JAVA_LIB_PATH -cp $CLASSPATH azkaban.execapp.AzkabanExecutorServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
+java $AZKABAN_OPTS $JAVA_LIB_PATH -cp $CLASSPATH azkaban.execapp.AzkabanExecutorServer -conf $conf $@ &
 
 PID=$!
 
 echo "looking for PID $PID"
 
 # Sleep for a few seconds & check process is still running
-timeout 2 tail -f "$ERR_LOG"
+sleep 3
 if test -z "`ps x | grep $PID | grep -v "grep $PID"`"; then
 	echo "ERROR: Server start failed!" >&2
 	echo -e "Serverpath: $serverpath\n" >&2
-	#tail $ERR_LOG >&2
 	exit 1
 fi
 
