@@ -1,0 +1,6 @@
+/var/log/azkaban-web-server
+/var/run/azkaban-web-server
+/etc/azkaban-web-server/plugins
+/usr/lib/azkaban-web-server/extlib
+/var/lib/azkaban-web-server
+/usr/share/azkaban-web-server/web

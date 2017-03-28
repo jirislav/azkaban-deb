@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Shutdown script for azkaban web server
+set -o nounset
+
+# kill the process with retry
+# return 0 if kill succeeds or no process to kill,
+#        1 if kill fails
+
+kill_process_with_retry() {
+    pid="$1"
+    pname="$2"
+    maxattempt="$3"
+
+    if [[ -z $pid ]]; then
+        echo "pid doesn't exist, shutdown completed"
+        return 0
+    fi
+
+    for try in $(seq 1 $maxattempt); do
+        if [[ ! -z $pid ]]; then
+            echo "Killing $pname. [pid: $pid], attempt: $try"
+            kill ${pid}
+            sleep 5
+            if [[ -n "$(ps -p $pid -o pid=)" ]]; then
+                echo "$pname is not dead [pid: $pid]"
+                if [[ $try -lt $maxattempt ]]; then
+                    echo "sleeping for a few seconds before retry"
+                    sleep 10
+                fi
+            else
+                echo "shutdown succeeded"
+                return 0
+            fi
+        fi
+    done
+
+    echo "Error: unable to kill process for $maxattempt attempt(s), killing the process with -9"
+    kill -9 $pid
+    sleep 5
+    if [[ -n "$(ps -p $pid -o pid=)" ]]; then
+        echo "$pname is not dead even after kill -9 [pid: $pid]"
+        return 1
+    else
+        echo "shutdown succeeded"
+        return 0
+    fi
+}
+
+RUN_DIR=/var/run/azkaban-exec-server
+if test ! -f $RUN_DIR/currentpid; then
+    echo "currentpid empty - not running?"
+    exit 0
+fi
+
+maxattempt=3
+pid=`cat $RUN_DIR/currentpid`
+pname="exec server"
+
+kill_process_with_retry "${pid}" "${pname}" "${maxattempt}"
+
+if [[ $? == 0 ]]; then
+    rm -f $RUN_DIR/currentpid
+    rm -f $RUN_DIR/executor.port
+    exit 0
+else
+    exit 1
+fi
