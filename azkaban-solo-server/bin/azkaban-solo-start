@@ -50,7 +50,6 @@ serverpath=/var/lib/azkaban-solo-server
 logdir=/var/log/azkaban-solo-server
 
 OUT_LOG=$logdir/output.log
-ERR_LOG=$logdir/error.log
 
 if [ -z $AZKABAN_OPTS ]; then
     AZKABAN_OPTS=-Xmx3G
@@ -73,8 +72,10 @@ fi
 echo "Running the server ..."
 echo "Logging dir: $logdir"
 
+OUT_LOG_LINES=`wc -l < "$OUT_LOG" 2>/dev/null || echo 0`
+
 cd $serverpath
-java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
+java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ &>>$OUT_LOG &
 
 PID=$!
 
@@ -82,8 +83,13 @@ PID=$!
 sleep 2
 if test -z "`ps x | grep ^$PID`"; then
     echo "Server start failed!" >&2
-    echo -e "Serverpath: $serverpath\n" >&2
-    tail $ERR_LOG >&2
+    echo "Take a look at the logs: " >&2
+
+    # Detect how much line java wrote so far .. (we will print them)
+    CURRENT_LINES=`wc -l < "$OUT_LOG" 2>/dev/null || echo 0`
+    LINES_OUTPUTTED=$(( $CURRENT_LINES - $OUT_LOG_LINES ))
+
+    tail -n$LINES_OUTPUTTED "$OUT_LOG" >&2
     exit 1
 fi
 
