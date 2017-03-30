@@ -72,7 +72,7 @@ fi
 echo "Running the server ..."
 echo "Logging dir: $logdir"
 
-OUT_LOG_LINES=`wc -l < "$OUT_LOG" 2>/dev/null || echo 0`
+OUT_LOG_LINES=`wc -l 2>/dev/null < "$OUT_LOG" || echo 0`
 
 cd $serverpath
 java $AZKABAN_OPTS -cp $CLASSPATH azkaban.soloserver.AzkabanSingleServer -conf $conf $@ &>>$OUT_LOG &
@@ -86,7 +86,7 @@ if test -z "`ps x | grep ^$PID`"; then
     echo "Take a look at the logs: " >&2
 
     # Detect how much line java wrote so far .. (we will print them)
-    CURRENT_LINES=`wc -l < "$OUT_LOG" 2>/dev/null || echo 0`
+    CURRENT_LINES=`wc -l 2>/dev/null < "$OUT_LOG" || echo 0`
     LINES_OUTPUTTED=$(( $CURRENT_LINES - $OUT_LOG_LINES ))
 
     tail -n$LINES_OUTPUTTED "$OUT_LOG" >&2
