@@ -2,7 +2,20 @@
 
 PID_FILE=/var/run/azkaban-solo-server/currentpid
 
-proc=`cat $PID_FILE`
+if test -f $PID_FILE; then
+    proc=`cat $PID_FILE`
+else
+    # PID file doesn't exist 
+    exit 0
+fi
+
+if test -z "$proc"; then
+    # PID file is empty ..
+    exit 0
+fi
+
+kill -0 $proc &>/dev/null || exit 0 # process doesnt exist anymore ..
+
 echo "killing AzkabanSingleServer"
 kill $proc
 
