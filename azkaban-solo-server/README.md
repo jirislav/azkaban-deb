@@ -21,5 +21,5 @@ git clone --recursive
  - Package installs azkaban using Filesystem Hiearchy Standard
  - Configuration files are in /etc/azkaban-solo-server + /etc/azkaban-solo-server/plugins
  - Library files are in /usr/lib/azkaban-solo-server
- - Other SQL scripts & web definitions are in /usr/share/azkaban-solo-server/
+ - Other SQL scripts & web definitions are in /var/lib/azkaban-solo-server/
  - Executables are created in /usr/bin to provide non-link access to azkaban run/stop scripts (this is because they cannot run when symlinked ..)
