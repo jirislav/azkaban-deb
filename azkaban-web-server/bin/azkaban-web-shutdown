@@ -1,67 +1,64 @@
 #!/usr/bin/env bash
-# Shutdown script for azkaban web server
-set -o nounset
 
-# kill the process with retry
-# return 0 if kill succeeds or no process to kill,
-#        1 if kill fails
+# Needed for broken PID_FILE
+AZKABAN_TYPE=azkaban-web-server
+JAVA_MAIN_CLASS=azkaban.webapp.AzkabanWebServer
 
-kill_process_with_retry() {
-    pid="$1"
-    pname="$2"
-    maxattempt="$3"
+PID_FILE=/var/run/$AZKABAN_TYPE/currentpid
 
-    if [[ -z $pid ]]; then
-        echo "pid doesn't exist, shutdown completed"
-        return 0
-    fi
+# PATHS to look for in ps if PID_FILE doesn't exist
+CONF_PATH=/etc/$AZKABAN_TYPE
+SERVER_PATH=/var/lib/$AZKABAN_TYPE
+LOG_PATH=/var/log/$AZKABAN_TYPE
 
-    for try in $(seq 1 $maxattempt); do
-        if [[ ! -z $pid ]]; then
-            echo "Killing $pname. [pid: $pid], attempt: $try"
-            kill ${pid}
-            sleep 5
-            if [[ -n "$(ps -p $pid -o pid=)" ]]; then
-                echo "$pname is not dead [pid: $pid]"
-                if [[ $try -lt $maxattempt ]]; then
-                    echo "sleeping for a few seconds before retry"
-                    sleep 10
-                fi
-            else
-                echo "shutdown succeeded"
-                return 0
-            fi
-        fi
-    done
-
-    echo "Error: unable to kill process for $maxattempt attempt(s), killing the process with -9"
-    kill -9 $pid
-    sleep 5
-    if [[ -n "$(ps -p $pid -o pid=)" ]]; then
-        echo "$pname is not dead even after kill -9 [pid: $pid]"
-        return 1
-    else
-        echo "shutdown succeeded"
-        return 0
-    fi
-}
-
-RUN_DIR=/var/run/azkaban-exec-server
-if test ! -f $RUN_DIR/currentpid; then
-    echo "currentpid empty - not running?"
-    exit 0
+if test -f "$PID_FILE"; then
+    PID=`cat "$PID_FILE"`
+else
+    # PID file doesn't exist 
+    touch "$PID_FILE"
 fi
 
-maxattempt=3
-pid=`cat $RUN_DIR/currentpid`
-pname="exec server"
+if test -z "$PID"; then
+    # Try to obtain the PID from ps x (must have JAVA_MAIN_CLASS, SERVER_PATH, LOG_PATH, CONF_PATH & be a java)
+    CMD="ps x | grep '$JAVA_MAIN_CLASS' | grep 'serverpath=$SERVER_PATH' | grep 'log4j.log.dir=$LOG_PATH' | grep 'conf $CONF_PATH' | grep 'java' | awk '{print \$1}'"
+    #echo "$CMD"
+    PID=`eval "$CMD"`
+fi
 
-kill_process_with_retry "${pid}" "${pname}" "${maxattempt}"
+PIDS_FOUND=`echo "$PID" | wc -l`
 
-if [[ $? == 0 ]]; then
-    rm -f $RUN_DIR/currentpid
-    rm -f $RUN_DIR/executor.port
-    exit 0
-else
+# If we got more than 1 result, or 0 results, show error
+if test -z "$PID" || test $PIDS_FOUND -gt 1; then
+    echo "No running $AZKABAN_TYPE detected" >&2
     exit 1
 fi
+
+# Check PID still exists
+kill -0 $PID &>/dev/null 
+
+if test $? -ne 0; then
+    echo "PID '$PID' doesn't exist anymore" >&2
+    echo "Truncating PID_FILE" >&2
+    > "$PID_FILE"
+    echo "Now you can run me again .. (will try find the server using 'ps')"
+    exit 3
+fi
+
+# Kill server gracefully with timeout
+timeout 10 kill -TERM $PID
+
+if test $? -ne 0; then
+    # Just try kill the process .. 
+    kill -KILL $PID
+fi
+
+if test $? -ne 0; then
+    # Not even SIGKILL succeeded .. something's bad
+    echo "Failed to kill '$PID'" >&2
+fi
+
+# Truncate PID_FILE
+> "$PID_FILE"
+
+echo "Shutdown of $AZKABAN_TYPE done"
+exit 0
