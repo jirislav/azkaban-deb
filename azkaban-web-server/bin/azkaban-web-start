@@ -1,107 +1,159 @@
 #!/bin/bash
-# Example call:
-# OUT_LOG=/tmp/output.log ERR_LOG=/tmp/err.log azkaban-web-server
 
-# Specifies location of azkaban.properties, log4j.properties files
-# Change if necessary
-conf=/etc/azkaban-web-server
-plugins=$conf/plugins
-libs=/usr/lib/azkaban-web-server
+AZKABAN_TYPE=azkaban-web-server
+JAVA_MAIN_CLASS=azkaban.webapp.AzkabanWebServer
 
-if [[ -z "$tmpdir" ]]; then
-	tmpdir=/tmp
-fi
+PID_FILE=/var/run/$AZKABAN_TYPE/currentpid
 
-for file in $libs/*.jar;
-do
-	CLASSPATH=$CLASSPATH:$file
-done
+SERVER_PATH=/var/lib/$AZKABAN_TYPE
+LIBS_PATH=/usr/lib/$AZKABAN_TYPE
+CONF_PATH=/etc/$AZKABAN_TYPE
+PLUGINS_PATH=$CONF_PATH/plugins
+LOG_PATH=/var/log/$AZKABAN_TYPE
+OUT_LOG=$LOG_PATH/output.log
 
-for file in $libs/extlib/*.jar;
-do
-	CLASSPATH=$CLASSPATH:$file
-done
+TMP_PATH=/tmp/$AZKABAN_TYPE
 
-for file in $plugins/*/*.jar;
-do
-	CLASSPATH=$CLASSPATH:$file
-done
+assertAzkabanNotRunning() {
 
-if [ "$HADOOP_HOME" != "" ]; then
-	echo "Using Hadoop from $HADOOP_HOME"
-	CLASSPATH=$CLASSPATH:$HADOOP_HOME/conf:$HADOOP_HOME/*
-	JAVA_LIB_PATH="-Djava.library.path=$HADOOP_HOME/lib/native/Linux-amd64-64"
-else
-	echo "Error: HADOOP_HOME is not set. Hadoop job types will not run properly."
-	# Must have log4j.properties ..
-	CLASSPATH=$CLASSPATH:$conf
-fi
+    # Pass if PID_FILE doesn't exist ..
+    test ! -f "$PID_FILE" && return 0
 
-if [ "$HIVE_HOME" != "" ]; then
-	echo "Using Hive from $HIVE_HOME"
-	CLASSPATH=$CLASSPATH:$HIVE_HOME/conf:$HIVE_HOME/lib/*
-fi
+    # Check if is azkaban already running ..
+    PID="`<$PID_FILE`"
+    if test ! -z "$PID" && test "`ps x | egrep "^\s*$PID"`"; then
+        echo "$AZKABAN_TYPE already running, PID: $PID" >&2
+        exit 1
+    fi
+}
 
-executorport=`cat $conf/azkaban.properties | grep executor.port | cut -d = -f 2`
-jettyport=`cat $conf/azkaban.properties | grep jetty.port | cut -d = -f 2`
-jettyssl=`cat $conf/azkaban.properties | grep jetty.use.ssl | cut -d = -f 2`
-if test $jettyssl = "false"; then
-    webprotocol="http://"
-else
-    webprotocol="https://"
-    jettyport=`cat $conf/azkaban.properties | grep jetty.ssl.port | cut -d = -f 2`
-fi
-serverpath=/var/lib/azkaban-web-server
-logdir=/var/log/azkaban-web-server
+buildClassPath() {
+    for file in $LIBS_PATH/*.jar;
+    do
+        CLASSPATH=$CLASSPATH:$file
+    done
 
-if test -z "$OUT_LOG"; then
-	OUT_LOG=$logdir/output.log
-fi
+    for file in $LIBS_PATH/extlib/*.jar;
+    do
+        CLASSPATH=$CLASSPATH:$file
+    done
 
-if test -z "$ERR_LOG"; then
-	ERR_LOG=$logdir/error.log
-fi
+    for file in $PLUGINS_PATH/*/*.jar;
+    do
+        CLASSPATH=$CLASSPATH:$file
+    done
 
-if [ -z $AZKABAN_OPTS ]; then
-	AZKABAN_OPTS=-Xmx3G
-fi
-# Set the log4j configuration file
-if [ -f $conf/log4j.properties ]; then
-	AZKABAN_OPTS="$AZKABAN_OPTS -Dlog4j.configuration=file:$conf/log4j.properties"
-fi
-AZKABAN_OPTS="$AZKABAN_OPTS -server -Dcom.sun.management.jmxremote -Djava.io.tmpdir=$tmpdir -Dexecutorport=$executorport -Dserverpath=$serverpath -Dlog4j.log.dir=$logdir"
+    if [ "$HADOOP_HOME" != "" ]; then
+        echo "Using Hadoop from $HADOOP_HOME"
+        CLASSPATH=$CLASSPATH:$HADOOP_HOME/conf:$HADOOP_HOME/*
+        JAVA_LIB_PATH="-Djava.library.path=$HADOOP_HOME/lib/native/Linux-amd64-64"
+    else
+        echo "Error: HADOOP_HOME is not set. Hadoop job types will not run properly."
+        # Executor would fail without this
+        CLASSPATH=$CLASSPATH:$CONF_PATH
+    fi
 
-java -version 2>&1 | egrep -o "build 1\.[891]" >/dev/null
+    if [ "$HIVE_HOME" != "" ]; then
+        echo "Using Hive from $HIVE_HOME"
+        CLASSPATH=$CLASSPATH:$HIVE_HOME/conf:$HIVE_HOME/lib/*
+    fi
 
-if test $? -ne 0; then
-	echo "Java must run in version 8 and higher!" >&2
-	echo "On debian distro you can run:" >&2
-	echo " update-alternatives --config java" >&2
-	exit 2
-fi
+}
 
-echo "Running the web server on port $jettyport"
-echo "Logging dir: $logdir"
+buildAzkabanOpts() {
+    if [ -z $AZKABAN_OPTS ]; then
+        AZKABAN_OPTS=-Xmx3G
+    fi
+    # Set the log4j configuration file
+    if [ -f $CONF_PATH/log4j.properties ]; then
+        AZKABAN_OPTS="$AZKABAN_OPTS -Dlog4j.configuration=file:$CONF_PATH/log4j.properties"
+    fi
+    AZKABAN_OPTS="$AZKABAN_OPTS -server -Dcom.sun.management.jmxremote -Djava.io.tmpdir=$TMP_PATH -Dexecutorport=$EXECUTOR_PORT -Dserverpath=$SERVER_PATH -Dlog4j.log.dir=$LOG_PATH"
+}
 
-cd $serverpath
-java $AZKABAN_OPTS $JAVA_LIB_PATH -cp $CLASSPATH azkaban.webapp.AzkabanWebServer -conf $conf $@ >>$OUT_LOG 2>>$ERR_LOG &
+getConfigValue() {
+    local WHAT="$1"
 
-PID=$!
+    if test -z "$AZKABAN_PROPERTIES"; then
+        AZKABAN_PROPERTIES=`<"$CONF_PATH/azkaban.properties"`
+    fi
 
-echo "looking for PID $PID"
+    echo "$AZKABAN_PROPERTIES" | grep "$WHAT" | cut -d = -f 2
+}
 
-# Sleep for a few seconds & check process is still running
-timeout 2 tail -f "$ERR_LOG"
-if test -z "`ps x | grep $PID | grep -v "grep $PID"`"; then
-	echo "ERROR: Server start failed!" >&2
-	echo -e "Serverpath: $serverpath\n" >&2
-	#tail $ERR_LOG >&2
-	exit 1
-fi
+parseConfig() {
+    EXECUTOR_PORT=`getConfigValue executor.port`
+    JETTY_PORT=`getConfigValue jetty.port`
+    JETTY_SSL=`getConfigValue jetty.use.ssl`
 
-echo $PID > /var/run/azkaban-web-server/currentpid
+    if test "$JETTY_SSL" = "false" || test -z "$JETTY_SSL"; then
+        WEB_PROTOCOL="http://"
+    else
+        WEB_PROTOCOL="https://"
+    fi
+}
 
-echo "Server started successfully"
-echo "PID: $PID"
-echo
-echo "You can visit the azkaban-web-server at $webprotocol`hostname`:$jettyport"
+runJava() {
+    echo "Running the server ..."
+    echo "Logging dir: $LOG_PATH"
+
+    OUT_LOG_LINES=`wc -l 2>/dev/null < "$OUT_LOG" || echo 0`
+
+    cd $SERVER_PATH
+    java $AZKABAN_OPTS -cp $CLASSPATH $JAVA_MAIN_CLASS -conf $CONF_PATH $@ &>>"$OUT_LOG" &
+
+    PID=$!
+}
+
+assertStillRunning() {
+    if test -z "`ps x | egrep "^\s*$PID"`"; then
+        echo "Server start failed!" >&2
+        echo "Take a look at the logs: " >&2
+
+        # Detect how much line java wrote so far .. (we will print them)
+        CURRENT_LINES=`wc -l 2>/dev/null < "$OUT_LOG" || echo 0`
+        LINES_OUTPUTTED=$(( $CURRENT_LINES - $OUT_LOG_LINES ))
+
+        tail -n$LINES_OUTPUTTED "$OUT_LOG" >&2
+        exit 1
+    fi
+}
+
+startServer() {
+
+    checkJavaVersion
+
+    assertAzkabanNotRunning
+
+    buildClassPath
+    buildAzkabanOpts
+    parseConfig
+
+    runJava
+
+    # Sleep for a few seconds & check process is still running
+    sleep 3
+
+    assertStillRunning
+
+    echo $PID > "$PID_FILE"
+
+    echo "Server started successfully"
+    echo "PID: $PID"
+    echo
+    echo "You can visit the azkaban-web-server at $WEB_PROTOCOL`hostname`:$JETTY_PORT"
+}
+
+checkJavaVersion() {
+    java -version 2>&1 | egrep -o "build 1\.[891]" >/dev/null
+
+    if test $? -ne 0; then
+        echo "Java must run in version 8 and higher!" >&2
+        echo "On debian distro you can run:" >&2
+        echo " update-alternatives --config java" >&2
+        exit 2
+    fi
+}
+
+startServer
+exit $?
