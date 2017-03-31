@@ -131,9 +131,8 @@ startServer() {
     echo $PID > "$PID_FILE"
 
     echo "Server started successfully"
+    echo "Port: $EXECUTOR_PORT"
     echo "PID: $PID"
-    echo
-    echo "You can visit the azkaban-web-server at $WEB_PROTOCOL`hostname`:$JETTY_PORT"
 }
 
 checkJavaVersion() {
