@@ -9,7 +9,7 @@ Standards-Version: 3.9.4
 Package: azkaban-solo-server
 Architecture: all
 Depends:
- openjdk-8-jdk | oracle-java8-jdk | coreutils
+ openjdk-8-jdk | oracle-java8-jdk | coreutils | 9base | grep | procps | bash
 Description: Azkaban workflow manager (Solo server)
  Azkaban is a batch workflow job scheduler created at LinkedIn to run Hadoop jobs. Azkaban resolves the ordering through job dependencies and provides an easy to use web user interface to maintain and track your workflows. 
 
