@@ -1,20 +1,16 @@
 #### This repository provides debian package for [azkaban solo server](http://azkaban.github.io/azkaban/docs/latest/#solo-setup)
 
-After cloning this repository, run also update for submodules:
-```bash
-git submodule update --init --recursive
-```
+Solo server contains bundled web-server & executor-server. By installing it you choose to don't have web-server & exec-server apart.
 
-Or clone this repository directly with all submodules:
-```bash
-git clone --recursive
-```
+#### Installation
 
-#### Official project documentation
- - [Latest Docs](http://azkaban.github.io/azkaban/docs/latest/)
- - [Getting Started](http://azkaban.github.io/azkaban/docs/latest/#getting-started)
- - [Configuration](http://azkaban.github.io/azkaban/docs/latest/#configuration)
- - [Creating Flows](http://azkaban.github.io/azkaban/docs/latest/#creating-flows)
+ - You have checked-out the original azkaban project as a submodule, see main README.md
+ - You run (withi missing dependencies always run just `sudo apt-get install -f`)
+```bash
+make localtest
+```
+ - Database M2 is automatically initialized, no worries :)
+  - If you want to have your own managed DB, set it up & configure it at `/etc/azkaban-solo-server`
 
 #### Project hiearchy (azkaban-solo-server)
 
