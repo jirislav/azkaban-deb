@@ -56,6 +56,14 @@ mysql> GRANT CREATE,SELECT,INSERT,UPDATE,DELETE,INDEX ON azkaban.* to 'azkaban-u
 mysql> FLUSH PRIVILEGES;
 ```
 
+Initialize all tables
+```bash
+VERSION=3.17.0
+DB_USER=azkaban-user
+DB_PASS=azkaban-password
+mysql -u$DB_USER -p$DB_PASS azkaban < ../src/azkaban-sql/build/install/azkaban-sql/create-all-sql-$VERSION.sql
+```
+
 Enlarge `max_allowed_packet` to something like 1024M.
 ```bash
 sudo editor /etc/mysql/my.cnf
