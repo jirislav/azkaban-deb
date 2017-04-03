@@ -27,7 +27,7 @@ install:
 	cp -R $(BUILD)/sql/* $(SQL_DEST)
 	cp -R $(BUILD)/web/* $(WEB_DEST)
 	cp -R $(BUILD)/lib/* $(LIB)
-	-cp -R extlib/* $(LIB)/extlib
+	-cp -R ../extlib/* $(LIB)/extlib
 	cp -R bin/* $(BIN)
 
 localtest: deb

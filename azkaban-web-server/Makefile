@@ -24,7 +24,7 @@ install:
 	cp -R conf/* $(CONF)
 	cp -R $(BUILD)/lib/* $(LIB)
 	cp -R $(BUILD)/web/* $(WEB)
-	-cp -R extlib/* $(LIB)/extlib
+	-cp -R ../extlib/* $(LIB)/extlib
 	cp -R bin/* $(BIN)
 
 localtest: deb

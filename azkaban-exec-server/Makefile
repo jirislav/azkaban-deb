@@ -22,7 +22,7 @@ install:
 	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(BIN) $(SERVER_PATH)
 	cp -R conf/* $(CONF)
 	cp -R $(BUILD)/lib/* $(LIB)
-	-cp -R extlib/* $(LIB)/extlib
+	-cp -R ../extlib/* $(LIB)/extlib
 	cp -R bin/* $(BIN)
 
 localtest: deb
