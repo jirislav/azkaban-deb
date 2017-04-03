@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Needed for broken PID_FILE
+AZKABAN_TYPE=azkaban-solo-server
+JAVA_MAIN_CLASS=azkaban.soloserver.AzkabanSingleServer
+
+PID_FILE=/var/run/$AZKABAN_TYPE/currentpid
+
+# PATHS to look for in ps if PID_FILE doesn't exist
+CONF_PATH=/etc/$AZKABAN_TYPE
+SERVER_PATH=/var/lib/$AZKABAN_TYPE
+LOG_PATH=/var/log/$AZKABAN_TYPE
+
+if test -f "$PID_FILE"; then
+    PID=`cat "$PID_FILE"`
+else
+    # PID file doesn't exist 
+    touch "$PID_FILE"
+fi
+
+if test -z "$PID"; then
+    # Try to obtain the PID from ps x (must have JAVA_MAIN_CLASS, SERVER_PATH, LOG_PATH, CONF_PATH & be a java)
+    CMD="ps x | grep '$JAVA_MAIN_CLASS' | grep 'serverpath=$SERVER_PATH' | grep 'log4j.log.dir=$LOG_PATH' | grep 'conf $CONF_PATH' | grep 'java' | awk '{print \$1}'"
+    #echo "$CMD"
+    PID=`eval "$CMD"`
+fi
+
+PIDS_FOUND=`echo "$PID" | wc -l`
+
+# If we got more than 1 result, or 0 results, show error
+if test -z "$PID" || test $PIDS_FOUND -gt 1; then
+    echo "No running $AZKABAN_TYPE detected" >&2
+    exit 1
+fi
+
+# Check PID still exists
+kill -0 $PID &>/dev/null 
+
+if test $? -ne 0; then
+    echo "PID '$PID' doesn't exist anymore" >&2
+    echo "Truncating PID_FILE" >&2
+    > "$PID_FILE"
+    echo "Now you can run me again .. (will try find the server using 'ps')"
+    exit 3
+fi
+
+# Kill server gracefully with timeout
+timeout 10 kill -TERM $PID
+
+if test $? -ne 0; then
+    # Just try kill the process .. 
+    kill -KILL $PID
+fi
+
+if test $? -ne 0; then
+    # Not even SIGKILL succeeded .. something's bad
+    echo "Failed to kill '$PID'" >&2
+fi
+
+# Truncate PID_FILE
+> "$PID_FILE"
+
+echo "Shutdown of $AZKABAN_TYPE done"
+exit 0

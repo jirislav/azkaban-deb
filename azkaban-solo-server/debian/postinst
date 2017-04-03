@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo
+echo "Now you should edit permissions at '/etc/azkaban-solo-server/azkaban-users.xml'"
