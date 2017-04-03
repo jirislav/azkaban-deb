@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+CONF_DIR=/etc/azkaban-web-server
+CONF_FILE=$CONF_DIR/azkaban.properties
+USER_PERMISSIONS_FILE=$CONF_DIR/azkaban-users.xml
+
+echo
+echo "You can manage initial permissions in '$USER_PERMISSIONS_FILE'"
+echo "Other stuff (DB, hostname, port, SSL) '$CONF_FILE'"
+echo
+echo "Run 'azkaban-web-start' or 'azkaban-web-shutdown' to handle the web server"
+echo

@@ -1,0 +1,5 @@
+/debian/*.debhelper.log
+/debian/*.substvars
+/debian/azkaban-web-server/
+/debian/files
+/azkaban-web-server_*.deb

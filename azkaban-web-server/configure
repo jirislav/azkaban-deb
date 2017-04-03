@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+exitWith() {
+    echo "$@" >&2
+    exit 2
+}
+
+DESTDIR="$1"
+
+cd src
+
+# FIXME .. Add some test for npm registry timeout & then prompt for $NPM_REGISTRY env .. from makefile?
+npm config set registry https://npm.dev
+npm config set strict-ssl false
+
+# Install prerequisities
+npm install -g less dustjs-linkedin
+
+# Now run gradlew
+./gradlew installDist --stacktrace || exitWith "Failed to build azkaban with gradlew"
+
+echo "Now you can run make install"
+
+exit 0
