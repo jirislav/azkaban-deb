@@ -17,7 +17,7 @@ git clone --recursive
 
 ##### 2. Checkout version
 
-It's time to checkout some stable version in src (maybe (latest tag)[https://github.com/azkaban/azkaban/releases]?) .. that depends on you ..
+It's time to checkout some stable version in src (maybe [latest tag](https://github.com/azkaban/azkaban/releases)?) .. that depends on you ..
 
 ##### 3. Bootstrapping
 
