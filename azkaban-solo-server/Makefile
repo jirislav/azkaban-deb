@@ -11,12 +11,13 @@ CONF_PLUGINS=$(DESTDIR)/etc/$(COMPONENT)/plugins
 SQL_DEST=$(DESTDIR)/var/lib/${COMPONENT}/sql
 WEB_DEST=$(DESTDIR)/var/lib/${COMPONENT}/web
 
-BUILD=src/$(COMPONENT)/build/install/$(COMPONENT)
+BUILD=../src/$(COMPONENT)/build/install/$(COMPONENT)
 
 all:
 
 deb:
-	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) .
+	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) . || \
+		echo "Did you run './configure' in main directory?"
 
 install:
 	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(SQL_DEST) $(WEB_DEST) $(BIN_DEST) $(BIN)

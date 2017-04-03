@@ -1,7 +1,7 @@
 Source: azkaban-web-server
 Section: shells
 Priority: extra
-Maintainer: Sklik Stats <sklik.stats@firma.seznam.cz>
+Maintainer: Jiri Kozlovsky <jiri.kozlovsky@firma.seznam.cz>
 Build-Depends:
  debhelper (>= 7.0.50~), openjdk-8-source, openjdk-8-jre-jamvm, openjdk-8-jdk, npm (>= 1.4)
 Standards-Version: 3.9.4
@@ -9,7 +9,7 @@ Standards-Version: 3.9.4
 Package: azkaban-web-server
 Architecture: all
 Depends:
- openjdk-8-jdk | oracle-java8-jdk
-Description: Azkaban workflow manager (web server)
+ openjdk-8-jdk | oracle-java8-jdk | coreutils | 9base | grep | procps | bash
+Description: Azkaban workflow manager (Web server)
  Azkaban is a batch workflow job scheduler created at LinkedIn to run Hadoop jobs. Azkaban resolves the ordering through job dependencies and provides an easy to use web user interface to maintain and track your workflows. 
 

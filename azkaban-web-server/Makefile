@@ -11,12 +11,13 @@ CONF=$(DESTDIR)/etc/$(COMPONENT)
 CONF_PLUGINS=$(DESTDIR)/etc/$(COMPONENT)/plugins
 SERVER_PATH=$(DESTDIR)/var/lib/$(COMPONENT)
 
-BUILD=src/$(COMPONENT)/build/install/$(COMPONENT)
+BUILD=../src/$(COMPONENT)/build/install/$(COMPONENT)
 
 all:
 
 deb:
-	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) .
+	+dpkg-buildpackage -b -rfakeroot -uc -us && mv ../$(PACKAGE) . || \
+		echo "Did you run './configure' in main directory?"
 
 install:
 	install -d $(CONF) $(CONF_PLUGINS) $(LIB)/extlib $(BIN) $(SERVER_PATH) $(WEB)
