@@ -4,6 +4,7 @@ This project provides bundle of debian packages for azkaban's servers. Particula
 
 #### Installation
 
+##### 1. Initialize submodules
 After cloning this repository, run also update for submodules:
 ```bash
 git submodule update --init --recursive
@@ -14,19 +15,34 @@ Or clone this repository directly with all submodules:
 git clone --recursive
 ```
 
-Also, don't forget to checkout some stable version in src (maybe latest tag?) .. that depends on you ..
+##### 2. Checkout version
 
-Now pick a server you'd like to install, build a package & distribute it to your servers.
+It's time to checkout some stable version in src (maybe (latest tag)[https://github.com/azkaban/azkaban/releases]?) .. that depends on you ..
 
-Finally, set up the database.
+##### 3. Bootstrapping
 
-##### MySQL Database setup
+Now you should build the azkaban at current version by running just
+```bash
+./configure
+```
 
-Note that DB setup is not needed, when you are OK with running only solo server, which has it's own database bundled.
+Make sure, you have NPM installed. There is npm bundled in upstream azkaban repo, but it's not configurable, e.g. for your own NPM registry.
+
+Note that if the configure timeout's on NPM's install, you should check that you can access configured NPM registry. Edit ./configure if needed.
+
+##### 4. Package building
+
+Now pick a server you'd like to install, cd into it & run `make deb`
+
+Or, alternatively, if you want to make the debian package and install it right away on current machine, run `make localtest`
+
+##### 5. MySQL Database setup
+
+Note that DB setup is not needed in case you are OK with running only solo server, which has it's own database bundled.
 
 However, web server & exec server needs dedicated MySQL.
 
-###### DB initialization
+###### 5.1. DB initialization
 
 Create azkaban database
 ```mysql
@@ -55,6 +71,8 @@ And restart MySQL:
 sudo /sbin/service mysqld restart || sudo /sbin/service mysql restart
 ```
 
+##### 6. Configuration setup
+
 After an server is installed, set up the preferences into the configuration file `/etc/azkaban-{solo,web,exec}-server/azkaban.properties` (login, pw, database, host, port)
 ```ini
 # DB connection setup
@@ -65,6 +83,28 @@ mysql.database = azkaban
 mysql.user = azkaban-user
 mysql.password = azkaban-password
 mysql.numconnections = 100
+```
+
+##### 7. Run/stop the server
+
+All start/stop scripts are installed in /usr/bin
+
+For web-server
+```bash
+azkaban-web-start
+azkaban-web-shutdown
+```
+
+For exec-server
+```bash
+azkaban-exec-start
+azkaban-exec-shutdown
+```
+
+For solo-server
+```bash
+azkaban-solo-start
+azkaban-solo-shutdown
 ```
 
 #### Official project documentation

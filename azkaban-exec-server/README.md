@@ -1,6 +1,6 @@
 #### This repository provides debian package for [azkaban execution server](http://azkaban.github.io/azkaban/docs/latest/#executor-setup) 
 
-Executor server serves as a worker processing flows of jobs defined at azkaban-web-server.
+Executor server serves as a worker processing flows of jobs defined at azkaban-exec-server.
 
 #### Installation
 

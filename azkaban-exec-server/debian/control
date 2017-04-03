@@ -1,7 +1,7 @@
 Source: azkaban-exec-server
 Section: shells
 Priority: extra
-Maintainer: Sklik Stats <sklik.stats@firma.seznam.cz>
+Maintainer: Jiri Kozlovsky <jiri.kozlovsky@firma.seznam.cz>
 Build-Depends:
  debhelper (>= 7.0.50~), openjdk-8-source, openjdk-8-jre-jamvm, openjdk-8-jdk, npm (>= 1.4)
 Standards-Version: 3.9.4
